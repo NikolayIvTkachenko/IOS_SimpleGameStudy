@@ -22,12 +22,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         case high = 100.0
     }
     
+    enum GameState {
+        case notRunning
+        case running
+    }
+    
     
     let skater = Skater(imageNamed: "skater")
     
     var bricks = [SKSpriteNode]()
     var brickSize = CGSize.zero
     var brickLevel = BrickLevel.low
+    
+    var gameState = GameState.notRunning
     
     var scrollSpeed: CGFloat = 5.0
     let startingScrollSpeed : CGFloat = 5.0
@@ -66,7 +73,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let tapGesture = UITapGestureRecognizer(target: self, action: tapMethod)
         view.addGestureRecognizer(tapGesture)
         
-        startGame()
+        //startGame()
+        
+        let menuBackgroundColor = UIColor.black.withAlphaComponent(0.4)
+        let menuLayer = MenuLayer(color: menuBackgroundColor, size: frame.size)
+        
+        menuLayer.anchorPoint = CGPoint(x: 0.0, y: 0.0)
+        menuLayer.zPosition = 30
+        menuLayer.name = "menuLayer"
+        menuLayer.display(message: "Press and Play", score: nil)
+        addChild(menuLayer)
         
     }
     
@@ -131,6 +147,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func startGame(){
+        
+        gameState = .running
+        
         resetSkater()
         
         score = 0
@@ -150,12 +169,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func gameOver(){
         
+        gameState = .notRunning
+        
         if score > highScore {
             highScore = score
             updateHighScoreLabelText()
         }
         
-        startGame()
+        let menuBackgroundColor = UIColor.black.withAlphaComponent(0.4)
+        let menuLayer = MenuLayer(color: menuBackgroundColor, size: frame.size)
+        menuLayer.anchorPoint = CGPoint.zero
+        menuLayer.position = CGPoint.zero
+        menuLayer.zPosition = 30
+        menuLayer.name = "menuLayer"
+        menuLayer.display(message: "Game Over", score: score)
+        addChild(menuLayer)
     }
     
     func spawnBrick(atPosition position: CGPoint) -> SKSpriteNode {
@@ -200,56 +228,56 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     
-//    func updateBricks(withScrollAmount currentScrollAmount : CGFloat){
-//        var farthestRightBrickX : CGFloat = 0.0
-//
-//        for brick in bricks {
-//
-//            let newX = brick.position.x - currentScrollAmount
-//
-//            if newX < -brickSize.width {
-//                brick.removeFromParent()
-//                if let brickIndex = bricks.firstIndex(of: brick){
-//                    bricks.remove(at: brickIndex)
-//                }
-//            }else{
-//                brick.position = CGPoint(x: newX, y: brick.position.y)
-//
-//                if brick.position.x > farthestRightBrickX {
-//                    farthestRightBrickX = brick.position.x
-//                }
-//            }
-//        }
-//
-//        while farthestRightBrickX < frame.width {
-//            var brickX = farthestRightBrickX + brickSize.width + 1.0
-//            let brickY = (brickSize.height / 2.0) + brickLevel.rawValue
-//
-//            let randomNumber = arc4random_uniform(99)
-//
-//            if randomNumber < 5 {
-//                let gap = 20.0 * scrollSpeed
-//                brickX += gap
-//
-//                //на каждом разрыве добавляем алмаз
-//                let randomGemYAmount = CGFloat(arc4random_uniform(100))
-//                let newGemY = brickY + skater.size.height + randomGemYAmount
-//                let newGemX = brickX - gap / 2.0
-//
-//                spawnGem(atPosition: CGPoint(x: newGemX, y: newGemY))
-//
-//            } else if randomNumber < 10 {
-//                if brickLevel == .high{
-//                    brickLevel = .low
-//                }else if brickLevel == .low{
-//                    brickLevel = .high
-//                }
-//            }
-//
-//            let newBrick = spawnBrick(atPosition: CGPoint(x: brickX, y: brickY))
-//            farthestRightBrickX = newBrick.position.x
-//        }
-//    }
+    //    func updateBricks(withScrollAmount currentScrollAmount : CGFloat){
+    //        var farthestRightBrickX : CGFloat = 0.0
+    //
+    //        for brick in bricks {
+    //
+    //            let newX = brick.position.x - currentScrollAmount
+    //
+    //            if newX < -brickSize.width {
+    //                brick.removeFromParent()
+    //                if let brickIndex = bricks.firstIndex(of: brick){
+    //                    bricks.remove(at: brickIndex)
+    //                }
+    //            }else{
+    //                brick.position = CGPoint(x: newX, y: brick.position.y)
+    //
+    //                if brick.position.x > farthestRightBrickX {
+    //                    farthestRightBrickX = brick.position.x
+    //                }
+    //            }
+    //        }
+    //
+    //        while farthestRightBrickX < frame.width {
+    //            var brickX = farthestRightBrickX + brickSize.width + 1.0
+    //            let brickY = (brickSize.height / 2.0) + brickLevel.rawValue
+    //
+    //            let randomNumber = arc4random_uniform(99)
+    //
+    //            if randomNumber < 5 {
+    //                let gap = 20.0 * scrollSpeed
+    //                brickX += gap
+    //
+    //                //на каждом разрыве добавляем алмаз
+    //                let randomGemYAmount = CGFloat(arc4random_uniform(100))
+    //                let newGemY = brickY + skater.size.height + randomGemYAmount
+    //                let newGemX = brickX - gap / 2.0
+    //
+    //                spawnGem(atPosition: CGPoint(x: newGemX, y: newGemY))
+    //
+    //            } else if randomNumber < 10 {
+    //                if brickLevel == .high{
+    //                    brickLevel = .low
+    //                }else if brickLevel == .low{
+    //                    brickLevel = .high
+    //                }
+    //            }
+    //
+    //            let newBrick = spawnBrick(atPosition: CGPoint(x: brickX, y: brickY))
+    //            farthestRightBrickX = newBrick.position.x
+    //        }
+    //    }
     
     
     func updateBricks(withScrollAmount currentScrollAmount : CGFloat){
@@ -318,18 +346,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     func updateSkater(){
-//        if !skater.isInGround{
-//            let velocityY = skater.velocity.y - gravitySpeed
-//            skater.velocity = CGPoint(x: skater.velocity.x, y: velocityY)
-//            let newSkaterY : CGFloat = skater.position.y + skater.velocity.y
-//            skater.position = CGPoint(x: skater.position.x, y:newSkaterY)
-//
-//            if skater.position.y < skater.minimumY {
-//                skater.position.y = skater.minimumY
-//                skater.velocity = CGPoint.zero
-//                skater.isInGround = true
-//            }
-//        }
+        //        if !skater.isInGround{
+        //            let velocityY = skater.velocity.y - gravitySpeed
+        //            skater.velocity = CGPoint(x: skater.velocity.x, y: velocityY)
+        //            let newSkaterY : CGFloat = skater.position.y + skater.velocity.y
+        //            skater.position = CGPoint(x: skater.position.x, y:newSkaterY)
+        //
+        //            if skater.position.y < skater.minimumY {
+        //                skater.position.y = skater.minimumY
+        //                skater.velocity = CGPoint.zero
+        //                skater.isInGround = true
+        //            }
+        //        }
         
         if let velocityY = skater.physicsBody?.velocity.dy {
             if velocityY < -100.0 || velocityY > 100.0 {
@@ -357,8 +385,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
     }
-
+    
     override func update(_ currentTime: TimeInterval) {
+        
+        if gameState != .running {
+            return
+        }
         
         //медленно увеличиваем значение скорости по мере развития игры
         scrollSpeed += 0.01
@@ -384,10 +416,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     @objc func handleTap(tapGesture: UITapGestureRecognizer){
-        if skater.isInGround{
-            //skater.velocity = CGPoint(x: 0.0, y: skater.jumpSpeed)
-            //skater.isInGround = false
-            skater.physicsBody?.applyImpulse(CGVector(dx: 0.0, dy: 260.0))
+        if gameState == .running{
+            if skater.isInGround{
+                //skater.velocity = CGPoint(x: 0.0, y: skater.jumpSpeed)
+                //skater.isInGround = false
+                skater.physicsBody?.applyImpulse(CGVector(dx: 0.0, dy: 260.0))
+                run(SKAction.playSoundFileNamed("jump.wav", waitForCompletion: false))
+            }
+        }else{
+            if let menuLayer: SKSpriteNode = childNode(withName: "menuLayer") as? SKSpriteNode{
+                menuLayer.removeFromParent()
+                startGame()
+            }
         }
     }
     
@@ -395,6 +435,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func didBegin(_ contact: SKPhysicsContact) {
         if contact.bodyA.categoryBitMask == PhysicsCategory.skater &&
             contact.bodyB.categoryBitMask == PhysicsCategory.brick {
+            
+            if let velocityY = skater.physicsBody?.velocity.dy {
+                if !skater.isInGround && velocityY < 100.0{
+                    skater.createSparks()
+                }
+            }
+            
             skater.isInGround = true
         }else if contact.bodyA.categoryBitMask == PhysicsCategory.skater &&
             contact.bodyB.categoryBitMask == PhysicsCategory.gem {
@@ -403,6 +450,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 //добавляем очки за алмаз
                 score += 50
                 updateScoreLabelText()
+                run(SKAction.playSoundFileNamed("gem.wav", waitForCompletion: false))
             }
         }
     }
